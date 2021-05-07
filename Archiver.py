@@ -45,7 +45,7 @@ class MyClient(discord.Client):
             async_last_messages = channel.history(after=start_date, limit=65).filter(lambda msg: not msg.author.bot)
             last_messages = await async_last_messages.flatten()
             activity_markers = '⚡' * bisect.bisect(self.activity_threshold, len(last_messages))
-            await channel.edit(name=activity_markers + channel.name.replace('⚡', ''))
+            await channel.edit(name=channel.name.replace('⚡', '') + activity_markers)
 
     @activity_tracker.before_loop
     async def before_archiver(self):
