@@ -33,7 +33,7 @@ class MyClient(discord.Client):
         print('------')
         for guild in self.guilds:
             for channel in guild.channels:
-                if channel.name == 'Archive':
+                if channel.name == 'Archives':
                     self.archive[guild] = channel
         print('The archive section is', self.archive)
         print('------')
