@@ -12,10 +12,10 @@ class MyClient(discord.Client):
         super().__init__(*args, **kwargs)
 
         # Start the task to run in the background
-        self.archiver.start()
-        self.activity_tracker.start()
+        self.main_task.start()
 
         # Archive parameters
+        self.archive = {}  # Will be completed in before_archiver
         self.time_before_warning = datetime.timedelta(days=7)
         self.time_before_archive = datetime.timedelta(days=8)
         self.channel_watch_list = 'Mono-color', 'Bi-color', 'Tri-color', '4+-color'
@@ -28,23 +28,44 @@ class MyClient(discord.Client):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
         print('------')
 
-        # Find colored channel
-        print('Looking for the colored channels')
-        self.colored_channels = []
+        # Find Archive category
+        print('Looking for the archive section')
+        print('------')
         for guild in self.guilds:
             for channel in guild.channels:
+                if channel.name == 'Archive':
+                    self.archive[guild] = channel
+        print('The archive section is', self.archive)
+        print('------')
+
+    ###########################################################################################
+    # Update colored channel list
+    ###########################################################################################
+    @tasks.loop(hours=7)
+    async def main_task(self):
+        print('Looking for the colored channels')
+        for guild in self.guilds:
+            colored_channels = []
+            for channel in guild.channels:
                 if str(channel.category) in self.channel_watch_list:
-                    self.colored_channels.append(channel)
-        print('The colored channels are', self.colored_channels, '\n')
+                    colored_channels.append(channel)
+                    print(f'The colored channels in {guild} are {(channel.names for channel in colored_channels)}')
+
+                    # Call the sub tasks
+                    await self.activity_tracker(colored_channels)
+                    await self.archiver(colored_channels, self.archive[guild])
+
+    @main_task.before_loop
+    async def before_main_task(self):
+        await self.wait_until_ready()  # wait until the bot logs in
 
     ###########################################################################################
     # Activity tracker
     ###########################################################################################
-    @tasks.loop(hours=7)
-    async def activity_tracker(self):
+    async def activity_tracker(self, colored_channels):
         print('Start activity analysis')
         print('------')
-        for channel in self.colored_channels:
+        for channel in colored_channels:
             start_date = datetime.datetime.utcnow() - self.activity_timelaps
             async_last_messages = channel.history(after=start_date, limit=65).filter(lambda msg: not msg.author.bot)
             last_messages = await async_last_messages.flatten()
@@ -52,18 +73,13 @@ class MyClient(discord.Client):
             await channel.edit(name=channel.name.replace('⚡', '') + activity_markers)
             print(f'Adding "{activity_markers}" to the channel {channel}')
 
-    @activity_tracker.before_loop
-    async def before_archiver(self):
-        await self.wait_until_ready()  # wait until the bot logs in
-
     ###########################################################################################
     # Archiver
     ###########################################################################################
-    @tasks.loop(hours=7)
-    async def archiver(self):
+    async def archiver(self, colored_channels, archive):
         print('Start archive analysis')
         print('------')
-        for channel in self.colored_channels:
+        for channel in colored_channels:
             # Find time since last message
             last_two_msg = await channel.history(limit=2).flatten()
             last_human_msg = last_two_msg[0] if last_two_msg[0].author != client.user else last_two_msg[1]
@@ -72,7 +88,7 @@ class MyClient(discord.Client):
 
             # Archive
             if time_since_last_message > self.time_before_archive:
-                await channel.move(category=self.archive, beginning=True)
+                await channel.move(category=archive, beginning=True)
                 print(f'{channel} is archived.')
 
             # Warning
@@ -80,18 +96,6 @@ class MyClient(discord.Client):
                 time_remaining = self.time_before_archive - self.time_before_warning
                 await channel.send(f'Ce canal sera archivé dans {time_remaining.days} jour(s) sans nouvelle activité.')
                 print(f'{channel} is warned.')
-
-    @archiver.before_loop
-    async def before_archiver(self):
-        await self.wait_until_ready()  # wait until the bot logs in
-
-        # Find Archive category
-        print('Looking for the archive section')
-        for guild in self.guilds:
-            for channel in guild.channels:
-                if channel.name == 'Archive':
-                    self.archive = channel
-        print('The archive section is', self.archive)
 
 
 client = MyClient()
