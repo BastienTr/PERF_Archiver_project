@@ -40,14 +40,14 @@ class MyClient(discord.Client):
         print('------')
 
         # Find Archive category
-        print('Looking for the "Archives" and "💡 les nouvelles idees 💡" section')
+        print('Looking for the "Archives" and "Nouvelles idees" section')
         print('------')
         for guild in self.guilds:
             for channel in guild.channels:
-                if channel.name == 'Archives':
+                if 'archive' in channel.name.lower():
                     self.archive[guild] = channel
                     print(f'The archive section is {channel} in guild {guild}')
-                elif channel.name == '💡 les nouvelles idees 💡':
+                elif 'nouvelles idees' in channel.name.lower() or 'labo' in channel.name.lower() :
                     self.new_idea[guild] = channel
                     print(f'The new idea section is {channel} in guild {guild}')
         print('------')
