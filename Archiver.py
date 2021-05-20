@@ -24,7 +24,6 @@ class MyClient(discord.Client):
         self.archive = {}  # Will be completed in before_archiver
         self.time_before_warning = datetime.timedelta(days=7)
         self.time_before_archive = datetime.timedelta(days=8)
-        self.channel_watch_list = 'Mono-color', 'Bi-color', 'Tri-color', '4+-color'
 
         # Unarchive parameters
         self.new_idea = {}  # Will be completed in before_archiver
@@ -57,19 +56,20 @@ class MyClient(discord.Client):
     ###########################################################################################
     @tasks.loop(hours=6)
     async def main_task(self):
-        print('Looking for the colored channels')
         for guild in self.guilds:
+            print(f'Start main task in {guild}')
+            print('------')
             colored_channels = []
             for channel in guild.channels:
-                if str(channel.category) in self.channel_watch_list:
+                if 'color' in str(channel.category).lower():
                     colored_channels.append(channel)
-                    print(f'The colored channels in {guild} are {[channel.name for channel in colored_channels]}')
-                    print('------')
+            print(f'The colored channels in {guild} are {[channel.name for channel in colored_channels]}')
+            print('------')
 
-                    # Call the sub tasks
-                    await self.activity_tracker(colored_channels)
-                    await self.archiver(colored_channels, self.archive[guild])
-                    await self.unarchiver(self.archive[guild], self.new_idea[guild])
+            # Call the sub tasks
+            await self.activity_tracker(colored_channels)
+            await self.archiver(colored_channels, self.archive[guild])
+            await self.unarchiver(self.archive[guild], self.new_idea[guild])
 
     @main_task.before_loop
     async def before_main_task(self):
