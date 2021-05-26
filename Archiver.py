@@ -21,16 +21,19 @@ class MyClient(discord.Client):
         self.main_task.start()
 
         # Archive parameters
+        self.archive_guild_watchlist = "Bot Playground", "PERF' Innovation"
         self.archive = {}  # Will be completed in before_archiver
         self.time_before_warning = datetime.timedelta(days=7)
         self.time_before_archive = datetime.timedelta(days=8)
 
         # Unarchive parameters
+        self.unarchive_guild_watchlist = "Bot Playground", "PERF' Innovation"
         self.new_idea = {}  # Will be completed in before_archiver
         self.unarchive_timelaps = datetime.timedelta(days=3)
         self.unarchive_nb_users = 2
 
         # Activity tracker parameters
+        self.activity_guild_watchlist = "Bot Playground", "PERF' Innovation", "PERF' Historique", "PERF'"
         self.activity_timelaps = datetime.timedelta(days=3)
         self.activity_threshold = 3, 15, 45  # Based on Perf standard on 3 days
 
@@ -67,9 +70,12 @@ class MyClient(discord.Client):
             print('------')
 
             # Call the sub tasks
-            await self.activity_tracker(colored_channels)
-            await self.archiver(colored_channels, self.archive[guild])
-            await self.unarchiver(self.archive[guild], self.new_idea[guild])
+            if str(guild) in self.activity_guild_watchlist:
+                await self.activity_tracker(colored_channels)
+            if str(guild) in self.archive_guild_watchlist:
+                await self.archiver(colored_channels, self.archive[guild])
+            if str(guild) in self.unarchive_guild_watchlist:
+                await self.unarchiver(self.archive[guild], self.new_idea[guild])
 
     @main_task.before_loop
     async def before_main_task(self):
