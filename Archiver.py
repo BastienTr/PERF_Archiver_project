@@ -154,6 +154,15 @@ class MyClient(commands.Bot):
 client = MyClient('%', case_insensitive=True)
 
 
+def result_message(ctx):
+    actual_wins, actual_loses = client.winrates[ctx.channel.id, ctx.guild.id]
+    total_games = actual_wins + actual_loses
+    if total_games == 0:
+        return "Je ne connais aucun résultat pour ce deck."
+    else:
+        return f"""Il y a eu {total_games} partie(s) jouée(s) avec ce deck. Le score total est de {actual_wins}-{actual_loses} soit un winrate de {actual_wins / total_games:.0%}."""
+
+
 @client.command()
 async def score(ctx, wins, loses):
     """Pour soumettre les résultats d'une session.
@@ -165,7 +174,9 @@ async def score(ctx, wins, loses):
     # Send the answer and delete the user message
     async for message in ctx.history(limit=1):
         await message.delete()
-    await ctx.send("La session a bien été enregistrée. Merci :). Ce message s'auto-détruira dans 10s pour éviter de remplir le salon.", delete_after=10.0)
+    await ctx.send("La session a bien été enregistrée. Merci :)", delete_after=10.0)
+    await ctx.send(result_message(ctx), delete_after=10.0)
+    await ctx.send("Ce message s'auto-détruira dans 10s pour éviter de remplir le salon.", delete_after=10.0)
 
     # Update the backup file
     with open('winrates.pkl', 'wb') as winrate_file:
@@ -175,12 +186,7 @@ async def score(ctx, wins, loses):
 @client.command()
 async def winrate(ctx):
     """Résume les winrates pour ce salon."""
-    actual_wins, actual_loses = client.winrates[ctx.channel.id, ctx.guild.id]
-    total_games = actual_wins + actual_loses
-    if total_games == 0:
-        await ctx.send(f"Je ne connais aucun résultat pour ce deck.")
-    else:
-        await ctx.send(f"Il y a eu {total_games} partie(s) jouée(s) avec ce deck. Le winrate est de {actual_wins / total_games:.0%}.")
+    await ctx.send(result_message(ctx))
 
 ###########################################################################################
 # Launch the bot
