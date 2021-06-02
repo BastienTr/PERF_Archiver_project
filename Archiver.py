@@ -90,8 +90,8 @@ class MyClient(discord.Client):
         for channel in colored_channels:
             last_messages = await last_human_msg_in_timelaps(self.activity_timelaps, channel)
             activity_markers = '⚡' * bisect.bisect(self.activity_threshold, len(last_messages))
-            await channel.edit(name=channel.name.replace('⚡', '') + activity_markers)
             print(f'Adding "{activity_markers}" to the channel {channel}')
+            await channel.edit(name=channel.name.replace('⚡', '') + activity_markers)
         print('------')
 
     ###########################################################################################
@@ -103,8 +103,8 @@ class MyClient(discord.Client):
         for channel in colored_channels:
             # Find time since last message
             last_two_msg = await channel.history(limit=2).flatten()
-            last_human_msg = last_two_msg[0] if last_two_msg[0].author != client.user else last_two_msg[1]
-            time_since_last_message = datetime.datetime.utcnow() - last_human_msg.created_at
+            last_non_me_msg = last_two_msg[0] if last_two_msg[0].author != client.user else last_two_msg[1]
+            time_since_last_message = datetime.datetime.utcnow() - last_non_me_msg.created_at
             print(f'Last mesage in {channel} was {time_since_last_message} ago.')
 
             # Archive
