@@ -1,7 +1,13 @@
-from discord.ext import tasks
+from discord.ext import tasks, commands
 import discord
 import datetime
 import bisect
+from collections import defaultdict
+from pickle import load, dump
+
+
+def helper_double_zero_tuple():
+    return 0, 0
 
 
 async def last_human_msg_in_timelaps(timelaps, channel, limit=65):
@@ -10,7 +16,7 @@ async def last_human_msg_in_timelaps(timelaps, channel, limit=65):
     return await async_last_messages.flatten()
 
 
-class MyClient(discord.Client):
+class MyClient(commands.Bot):
     ###########################################################################################
     # Start up
     ###########################################################################################
@@ -37,6 +43,14 @@ class MyClient(discord.Client):
         self.activity_timelaps = datetime.timedelta(days=3)
         self.activity_threshold = 3, 15, 45  # Based on Perf standard on 3 days
 
+        # Winrates loading
+        try:
+            with open('winrates.pkl', 'rb') as winrate_file:
+                self.winrates = load(winrate_file)
+        except FileNotFoundError:
+            self.winrates = defaultdict(helper_double_zero_tuple)
+            open('winrates.pkl', 'x').close()
+
     async def on_ready(self):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
         print('------')
@@ -57,7 +71,7 @@ class MyClient(discord.Client):
     ###########################################################################################
     # Update colored channel list
     ###########################################################################################
-    @tasks.loop(hours=6)
+    @tasks.loop(hours=4)
     async def main_task(self):
         for guild in self.guilds:
             print(f'Start main task in {guild}')
@@ -134,5 +148,41 @@ class MyClient(discord.Client):
         print('------')
 
 
-client = MyClient()
+###########################################################################################
+# Add the bot winrate-related commands
+###########################################################################################
+client = MyClient('%', case_insensitive=True)
+
+
+@client.command()
+async def score(ctx, wins, loses):
+    """Pour soumettre les résultats d'une session.
+    Par exemple *%score 8 1* enregistre 8 victoires et 1 défaite avec le deck du salon."""
+    # Update the results
+    actual_wins, actual_loses = client.winrates[ctx.channel.id, ctx.guild.id]
+    client.winrates[ctx.channel.id, ctx.guild.id] = actual_wins + int(wins), actual_loses + int(loses)
+
+    # Send the answer and delete the user message
+    async for message in ctx.history(limit=1):
+        await message.delete()
+    await ctx.send("La session a bien été enregistrée. Merci :). Ce message s'auto-détruira dans 10s pour éviter de remplir le salon.", delete_after=10.0)
+
+    # Update the backup file
+    with open('winrates.pkl', 'wb') as winrate_file:
+        dump(client.winrates, winrate_file)
+
+
+@client.command()
+async def winrate(ctx):
+    """Résume les winrates pour ce salon."""
+    actual_wins, actual_loses = client.winrates[ctx.channel.id, ctx.guild.id]
+    total_games = actual_wins + actual_loses
+    if total_games == 0:
+        await ctx.send(f"Je ne connais aucun résultat pour ce deck.")
+    else:
+        await ctx.send(f"Il y a eu {total_games} partie(s) jouée(s) avec ce deck. Le winrate est de {actual_wins / total_games:.0%}.")
+
+###########################################################################################
+# Launch the bot
+###########################################################################################
 client.run('ODM5MDU1MjAzOTExMDczODgz.YJEFDQ.BTZ0Et3FASxMteP0E6VEurHYzh4')
