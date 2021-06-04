@@ -1,9 +1,10 @@
 from discord.ext import tasks, commands
-import discord
 import datetime
 import bisect
 from collections import defaultdict
 from pickle import load, dump
+from tabulate import tabulate
+import re
 
 
 def helper_double_zero_tuple():
@@ -43,6 +44,10 @@ class MyClient(commands.Bot):
         self.activity_timelaps = datetime.timedelta(days=3)
         self.activity_threshold = 3, 15, 45  # Based on Perf standard on 3 days
 
+        # Report state of server
+        self.report_guild_watchlist = "Bot Playground"
+        self.inventory_msg = {}
+
         # Winrates loading
         try:
             with open('winrates.pkl', 'rb') as winrate_file:
@@ -63,7 +68,7 @@ class MyClient(commands.Bot):
                 if 'archive' in channel.name.lower():
                     self.archive[guild] = channel
                     print(f'The archive section is {channel} in guild {guild}')
-                elif 'nouvelles idees' in channel.name.lower() or 'labo' in channel.name.lower() :
+                elif 'nouvelles idees' in channel.name.lower() or 'labo' in channel.name.lower():
                     self.new_idea[guild] = channel
                     print(f'The new idea section is {channel} in guild {guild}')
         print('------')
@@ -71,7 +76,7 @@ class MyClient(commands.Bot):
     ###########################################################################################
     # Update colored channel list
     ###########################################################################################
-    @tasks.loop(hours=4)
+    @tasks.loop(hours=3)
     async def main_task(self):
         for guild in self.guilds:
             print(f'Start main task in {guild}')
@@ -90,6 +95,8 @@ class MyClient(commands.Bot):
                 await self.archiver(colored_channels, self.archive[guild])
             if str(guild) in self.unarchive_guild_watchlist:
                 await self.unarchiver(self.archive[guild], self.new_idea[guild])
+            if str(guild) in self.report_guild_watchlist:
+                await self.deck_inventory(colored_channels)
 
     @main_task.before_loop
     async def before_main_task(self):
@@ -146,6 +153,28 @@ class MyClient(commands.Bot):
                 await channel.send(f'Je désarchive le canal.')
                 print(f'{channel} is unarchived.')
         print('------')
+
+    ###########################################################################################
+    # Report state of server
+    ###########################################################################################
+    async def deck_inventory(self, colored_channels):
+        winrates = (self.winrates[channel.id, channel.guild.id][0] / sum(self.winrates[channel.id, channel.guild.id])
+                    if sum(self.winrates[channel.id, channel.guild.id]) != 0 else 'A tester !'
+                    for channel in colored_channels)
+        content = ((channel.name.replace('⚡', ''),
+                    re.sub('[^⚡]', '', channel.name),
+                    self.winrates[channel.id, channel.guild.id],
+                    winrate)
+                   for channel, winrate in zip(colored_channels, winrates))
+        to_print = tabulate((lign for lign in content), ('Name', 'Activité', '(Victoire, Défaite)', 'Winrate'), 'grid')
+        to_print = "```\n" + to_print + "\n```"
+        try:
+            print(to_print)
+            await self.inventory_msg[colored_channels[0].guild].edit(content=to_print)
+        except KeyError:
+            for channel in colored_channels[0].guild.channels:
+                if 'inventaire' in channel.name.lower():
+                    self.inventory_msg[colored_channels[0].guild] = await channel.send(to_print)
 
 
 ###########################################################################################
