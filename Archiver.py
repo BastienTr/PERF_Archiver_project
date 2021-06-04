@@ -173,7 +173,6 @@ class MyClient(commands.Bot):
                             'grid')
         to_print = "```\n" + to_print + "\n```"
         try:
-            print(to_print)
             await self.inventory_msg[colored_channels[0].guild].edit(content=to_print)
         except KeyError:
             for channel in colored_channels[0].guild.channels:
