@@ -161,12 +161,16 @@ class MyClient(commands.Bot):
         winrates = (self.winrates[channel.id, channel.guild.id][0] / sum(self.winrates[channel.id, channel.guild.id])
                     if sum(self.winrates[channel.id, channel.guild.id]) != 0 else 'A tester !'
                     for channel in colored_channels)
-        content = ((channel.name.replace('⚡', ''),
+        formats = ('Historique' if 'histo' in channel.category.name.lower() else 'Standard' for channel in colored_channels)
+        content = ((format,
+                    channel.name.replace('⚡', ''),
                     re.sub('[^⚡]', '', channel.name),
                     self.winrates[channel.id, channel.guild.id],
                     winrate)
-                   for channel, winrate in zip(colored_channels, winrates))
-        to_print = tabulate((lign for lign in content), ('Name', 'Activité', '(Victoire, Défaite)', 'Winrate'), 'grid')
+                   for format, channel, winrate in zip(formats, colored_channels, winrates))
+        to_print = tabulate((lign for lign in content),
+                            ('Format', 'Name', 'Activité', '(Victoire, Défaite)', 'Winrate'),
+                            'grid')
         to_print = "```\n" + to_print + "\n```"
         try:
             print(to_print)
