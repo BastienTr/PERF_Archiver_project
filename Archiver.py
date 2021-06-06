@@ -158,7 +158,7 @@ class MyClient(commands.Bot):
     # Report state of server
     ###########################################################################################
     async def deck_inventory(self, colored_channels):
-        winrates = (self.winrates[channel.id, channel.guild.id][0] / sum(self.winrates[channel.id, channel.guild.id])
+        winrates = (f'{self.winrates[channel.id, channel.guild.id][0] / sum(self.winrates[channel.id, channel.guild.id]):.0%}'
                     if sum(self.winrates[channel.id, channel.guild.id]) != 0 else 'A tester !'
                     for channel in colored_channels)
         formats = ('Historique' if 'histo' in channel.category.name.lower() else 'Standard' for channel in colored_channels)
@@ -168,8 +168,8 @@ class MyClient(commands.Bot):
                     self.winrates[channel.id, channel.guild.id],
                     winrate)
                    for format, channel, winrate in zip(formats, colored_channels, winrates))
-        to_print = tabulate((lign for lign in content),
-                            ('Format', 'Name', 'Activité', '(Victoire, Défaite)', 'Winrate'),
+        to_print = tabulate(content,
+                            ('Format', 'Deck', 'Activité', '(Win, Lose)', 'Winrate'),
                             'grid')
         to_print = "```\n" + to_print + "\n```"
         try:
