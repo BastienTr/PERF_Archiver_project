@@ -197,8 +197,7 @@ def result_message(ctx):
 
 @client.command()
 async def score(ctx, wins, loses):
-    """Pour soumettre les résultats d'une session.
-    Par exemple *%score 8 1* enregistre 8 victoires et 1 défaite avec le deck du salon."""
+    """Pour soumettre des résultats de Bo3. Par exemple, si je gagne 2-1 puis perd 0-2, j'entre *%score 1 1*."""
     # Update the results
     actual_wins, actual_loses = client.winrates[ctx.channel.id, ctx.guild.id]
     client.winrates[ctx.channel.id, ctx.guild.id] = actual_wins + int(wins), actual_loses + int(loses)
