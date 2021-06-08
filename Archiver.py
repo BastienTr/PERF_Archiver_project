@@ -45,7 +45,7 @@ class MyClient(commands.Bot):
         self.activity_threshold = 3, 15, 45  # Based on Perf standard on 3 days
 
         # Report state of server
-        self.report_guild_watchlist = "Bot Playground"
+        self.report_guild_watchlist = "Bot Playground", "PERF' Innovation"
         self.inventory_msg = {}
 
         # Winrates loading
@@ -158,26 +158,29 @@ class MyClient(commands.Bot):
     # Report state of server
     ###########################################################################################
     async def deck_inventory(self, colored_channels):
-        winrates = (f'{self.winrates[channel.id, channel.guild.id][0] / sum(self.winrates[channel.id, channel.guild.id]):.0%}'
-                    if sum(self.winrates[channel.id, channel.guild.id]) != 0 else 'A tester !'
-                    for channel in colored_channels)
-        formats = ('Historique' if 'histo' in channel.category.name.lower() else 'Standard' for channel in colored_channels)
-        content = ((format,
-                    channel.name.replace('⚡', ''),
-                    re.sub('[^⚡]', '', channel.name),
-                    self.winrates[channel.id, channel.guild.id],
-                    winrate)
-                   for format, channel, winrate in zip(formats, colored_channels, winrates))
-        to_print = tabulate(content,
-                            ('Format', 'Deck', 'Activité', '(Win, Lose)', 'Winrate'),
-                            'grid')
-        to_print = "```\n" + to_print + "\n```"
-        try:
-            await self.inventory_msg[colored_channels[0].guild].edit(content=to_print)
-        except KeyError:
-            for channel in colored_channels[0].guild.channels:
-                if 'inventaire' in channel.name.lower():
-                    self.inventory_msg[colored_channels[0].guild] = await channel.send(to_print)
+        histo_colored_channel = [channel for channel in colored_channels
+                                 if 'histo' in channel.category.name.lower()]
+        std_colored_channel = [channel for channel in colored_channels
+                                 if 'std' in channel.category.name.lower()]
+        for channels, str_format in ((std_colored_channel, '**Standard**'), (histo_colored_channel, '**Historique**')):
+            winrates = (f'{self.winrates[channel.id, channel.guild.id][0] / sum(self.winrates[channel.id, channel.guild.id]):.0%}'
+                        if sum(self.winrates[channel.id, channel.guild.id]) != 0 else 'A tester !'
+                        for channel in channels)
+            content = ((channel.name.replace('⚡', ''),
+                        re.sub('[^⚡]', '', channel.name),
+                        self.winrates[channel.id, channel.guild.id],
+                        winrate)
+                       for channel, winrate in zip(channels, winrates))
+            to_print = tabulate(content,
+                                ('Deck', 'Activité', '(Win, Lose)', 'Winrate'),
+                                'github')
+            to_print = str_format + "\n\n```\n" + to_print + "\n```"
+            try:
+                await self.inventory_msg[colored_channels[0].guild, str_format].edit(content=to_print)
+            except KeyError:
+                for channel in colored_channels[0].guild.channels:
+                    if 'inventaire' in channel.name.lower():
+                        self.inventory_msg[colored_channels[0].guild, str_format] = await channel.send(to_print)
 
 
 ###########################################################################################
