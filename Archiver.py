@@ -5,6 +5,7 @@ from collections import defaultdict
 from pickle import load, dump
 from tabulate import tabulate
 import re
+from pytz import timezone, utc
 
 
 def helper_double_zero_tuple():
@@ -85,6 +86,7 @@ class MyClient(commands.Bot):
             for channel in guild.channels:
                 if 'color' in str(channel.category).lower():
                     colored_channels.append(channel)
+            colored_channels.sort(key=lambda channel: channel.name)
             print(f'The colored channels in {guild} are {[channel.name for channel in colored_channels]}')
             print('------')
 
@@ -172,10 +174,10 @@ class MyClient(commands.Bot):
                             self.winrates[channel.id, channel.guild.id],
                             winrate)
                         for channel, winrate in zip(channels, winrates))
-                to_print = tabulate(content,
-                                    ('Deck', 'Activité', '(Win, Lose)', 'Winrate'),
-                                    'github')
-                to_print = str_format + "\n\n```\n" + to_print + "\n```"
+                table = tabulate(content, ('Deck', 'Activité', '(Win, Lose)', 'Winrate'), 'github')
+                to_print = str_format + " ("
+                to_print += datetime.datetime.now(tz=utc).astimezone(timezone('Europe/Paris')).strftime('%d/%m/%y %H:%M')
+                to_print += ")\n\n```\n" + table + "\n```"
                 try:
                     await self.inventory_msg[colored_channels[0].guild, str_format].edit(content=to_print)
                 except KeyError:
@@ -192,24 +194,22 @@ client = MyClient('%', case_insensitive=True)
 
 def result_message(ctx):
     actual_wins, actual_loses = client.winrates[ctx.channel.id, ctx.guild.id]
-    total_games = actual_wins + actual_loses
-    if total_games == 0:
+    total_matchs = actual_wins + actual_loses
+    print(f'Notifying {ctx.channel} that the recorded score is {client.winrates[ctx.channel.id, ctx.guild.id]}')
+    if total_matchs == 0:
         return "Je ne connais aucun résultat pour ce deck."
     else:
-        return f"""Il y a eu {total_games} partie(s) jouée(s) avec ce deck. Le score total est de {actual_wins}-{actual_loses} soit un winrate de {actual_wins / total_games:.0%}."""
+        return f"""Il y a eu {total_matchs} partie(s) jouée(s) avec ce deck. Le score total est de {actual_wins}-{actual_loses} soit un winrate de {actual_wins / total_matchs:.0%}."""
 
 
-@client.command()
-async def score(ctx, wins, loses):
-    """Pour soumettre des résultats de Bo3. Par exemple, si je gagne 2-1 puis perd 0-2, j'entre *%score 1 1*."""
-    # Update the results
-    actual_wins, actual_loses = client.winrates[ctx.channel.id, ctx.guild.id]
-    client.winrates[ctx.channel.id, ctx.guild.id] = actual_wins + int(wins), actual_loses + int(loses)
+async def set_winrates(ctx, modif_type, new_wins, new_loses):
+    # Update the winrates
+    client.winrates[ctx.channel.id, ctx.guild.id] = new_wins, new_loses
 
     # Send the answer and delete the user message
     async for message in ctx.history(limit=1):
         await message.delete()
-    await ctx.send("La session a bien été enregistrée. Merci :)", delete_after=10.0)
+    await ctx.send(f"La {modif_type} a bien été enregistrée. Merci :)", delete_after=10.0)
     await ctx.send(result_message(ctx), delete_after=10.0)
     await ctx.send("Ce message s'auto-détruira dans 10s pour éviter de remplir le salon.", delete_after=10.0)
 
@@ -219,9 +219,26 @@ async def score(ctx, wins, loses):
 
 
 @client.command()
+async def score(ctx, wins, loses):
+    """*%score NbrVictoires NbrDéfaites* Pour soumettre des résultats de Bo3."""
+    actual_wins, actual_loses = client.winrates[ctx.channel.id, ctx.guild.id]
+    await set_winrates(ctx, 'session', actual_wins + int(wins), actual_loses + int(loses))
+    print(f'Updating the record for {ctx.channel}. New record is {client.winrates[ctx.channel.id, ctx.guild.id]}')
+
+
+@client.command()
+@commands.has_role('Planeswalkers')
+async def correct(ctx, wins, loses):
+    """*%correct NbrVictoires NbrDéfaites* Pour corriger les résultats (Planeswalkers seulement)."""
+    await set_winrates(ctx, 'correction', int(wins), int(loses))
+    print(f'Correcting the record for {ctx.channel}. New record is {client.winrates[ctx.channel.id, ctx.guild.id]}')
+
+
+@client.command()
 async def winrate(ctx):
     """Résume les winrates pour ce salon."""
     await ctx.send(result_message(ctx))
+    print(f'Providing the winrate {client.winrates[ctx.channel.id, ctx.guild.id]} to {ctx.channel}')
 
 ###########################################################################################
 # Launch the bot
