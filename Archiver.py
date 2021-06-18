@@ -1,4 +1,5 @@
 from discord.ext import tasks, commands
+from discord import Embed
 import datetime
 import bisect
 from collections import defaultdict
@@ -239,6 +240,24 @@ async def winrate(ctx):
     """Résume les winrates pour ce salon."""
     await ctx.send(result_message(ctx))
     print(f'Providing the winrate {client.winrates[ctx.channel.id, ctx.guild.id]} to {ctx.channel}')
+
+
+
+@client.command()
+@commands.has_role('Planeswalkers')
+async def move(ctx, channel_id):
+    """Déplace les messages du salon spécifié en argument là ou la commande est appellée."""
+    channel = client.get_channel(int(channel_id))
+    print(f'Moving the messages from {channel.name} in {channel.guild.name} to {ctx.channel.name} in {ctx.guild.name}')
+    async for msg_to_move in channel.history(limit=None, oldest_first=True):
+        message_date = msg_to_move.created_at.astimezone(timezone('Europe/Paris')).strftime('%d/%m/%y %H:%M')
+        embed = Embed(description=msg_to_move.content)
+        embed.set_author(name=msg_to_move.author.display_name,
+                         icon_url=msg_to_move.author.avatar_url)
+        embed.add_field(name='Provenance',
+                        value=f'Message du {message_date} déplacé depuis {channel.guild.name}')
+        await ctx.send(embed=embed)
+
 
 ###########################################################################################
 # Launch the bot
