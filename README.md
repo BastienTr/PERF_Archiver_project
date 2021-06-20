@@ -27,7 +27,7 @@ Certaines commandes requiert que l'utilisateur possède le rôle 'Planeswalkers'
 
 Enregistre `NbVictoires` et `NbDéfaites` pour le deck discuté dans le salon où la commande est appelé.
 Le win-rate est ensuite mis-à-jour pour être disponible aux autres fonctions ainsi que stocker dans un fichier de backup.
-La commade est effacée par le bot ainsi que ses messages pour éviter de surcharger les salons.
+La commande est effacée par le bot ainsi que ses messages pour éviter de surcharger les salons.
 
 [Correction des résultat : `%correct`]()
 -------------------------------------------
@@ -38,9 +38,9 @@ La commade est effacée par le bot ainsi que ses messages pour éviter de surcha
 
 Écrase les résultats enregistrés pour ce salon par ceux entrés. 
 Le win-rate est ensuite mis-à-jour pour être disponible aux autres fonctions ainsi que stocker dans un fichier de backup.
-La commade est effacée par le bot ainsi que ses messages pour éviter de surcharger les salons.
+La commande est effacée par le bot ainsi que ses messages pour éviter de surcharger les salons.
 
-[Correction des résultat : `%winrate`]()
+[Affichage des résultat : `%winrate`]()
 -------------------------------------------
 
 *Disponible pour tous.*
@@ -49,7 +49,7 @@ La commade est effacée par le bot ainsi que ses messages pour éviter de surcha
 
 Cette commande demande au bot d'afficher les résultats enregistrés dans ce salon (winrate et nombre de parties).
 
-[Correction des résultat : `%move`]()
+[Déplacement d'un canal : `%move`]()
 -------------------------------------------
 
 *Planswalkers uniquement.*
@@ -66,10 +66,10 @@ Pour obtenir l'id d'un salon, suivre cette procédure :
 Fonctionnalités passives
 ==================
 
-Toutes les quelques heures, le bot ressence tous les salons appartenant à une catégorie dont le nom contient "color"
-Il peut ensuite réaliser l'une ou plusieurs des tâches suivantes selon qu'elles soient active ou non sur chacun des serveurs.
+Toutes les quelques heures, le bot liste tous les salons appartenant à une catégorie dont le nom contient "color"
+Il peut ensuite réaliser l'une ou plusieurs des tâches suivantes selon qu'elles soient actives ou non sur chacun des serveurs.
 Chaque fonction peut être activée ou non d'un serveur à l'autre.
-Toutes les fonction cherchant des mots dans les noms de catégories sont insensible à la casse.
+Toutes les fonctions cherchant des mots dans les noms de catégories sont insensible à la casse.
 
 [Mise en avant de l'activité]()
 -------------------------------------------
@@ -109,7 +109,7 @@ Si le temps est supérieur au second seuil, le bot déplace le salon dans la cat
 
 *Actif dans PERF' Innovation.*
 
-Pour chaque salon, dans la catégorie contenant 'archive' dans son nom, le bot compte le nombre de messages humains au cours de la période fixée.
+Pour chaque salon, dans la catégorie contenant 'archive' dans son nom, le bot compte le nombre d'utilisateurs humain différents au cours de la période fixée.
 Si le nombre dépasse le seuil, le salon est déplacé dans la catégorie contenant 'nouvelles idees' ou 'labo' dans son nom.
 
 ### Paramètres de réglages actuels
@@ -117,7 +117,7 @@ Si le nombre dépasse le seuil, le salon est déplacé dans la catégorie conten
 | Paramètre | Valeur actuelle |
 |:---------:|:---------------:|
 | Période d'étude | 3 jours |
-| Nombre de messages pour désarchiver | 2 messages |
+| Nombre d'utilisateurs pour désarchiver | 2 utilisateurs |
 
 [Inventaire des decks]()
 -------------------------------------------
