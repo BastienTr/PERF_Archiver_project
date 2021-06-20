@@ -60,7 +60,7 @@ Cette commande demande au bot de recopier l'ensemble des messages du salon donn�
 Pour obtenir l'id d'un salon, suivre cette procédure :
  1. Activer le mode développeur sur Discord si ce n'est pas déjà fait. 
     1. Ouvrir les réglages de Discord.
-    1. Dans Apparence, activer le mode développeur. 
+    1. Dans Avancés, activer le mode développeur. 
  1. Clic droit sur le nom du salon, une option pour copier l'ID est disponible.
 
 Fonctionnalités passives
