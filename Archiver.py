@@ -151,7 +151,7 @@ class MyClient(commands.Bot):
         print('------')
         for channel in archive.channels:
             last_messages = await last_human_msg_in_timelaps(self.unarchive_timelaps, channel)
-            if len({msg.author for msg in last_messages}) >= self.unarchive_nb_users:
+            if len({msg.author for msg in last_messages}) >= self.unarchive_nb_users and 'ARCHIVE' not in last_messages[-1].content:
                 await channel.move(category=new_idea, beginning=True)
                 await channel.send(f'Je désarchive le canal.')
                 print(f'{channel} is unarchived.')

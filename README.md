@@ -111,6 +111,7 @@ Si le temps est supérieur au second seuil, le bot déplace le salon dans la cat
 
 Pour chaque salon, dans la catégorie contenant 'archive' dans son nom, le bot compte le nombre d'utilisateurs humain différents au cours de la période fixée.
 Si le nombre dépasse le seuil, le salon est déplacé dans la catégorie contenant 'nouvelles idees' ou 'labo' dans son nom.
+Le bot ne désarchive jamais un salon dont le dernier message contient "ARCHIVE" (en majuscule) ce qui permet de forcer l'archivage d'un salon.
 
 ### Paramètres de réglages actuels
  
