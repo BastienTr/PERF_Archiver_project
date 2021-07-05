@@ -50,6 +50,10 @@ class MyClient(commands.Bot):
         self.report_guild_watchlist = "Bot Playground", "PERF' Innovation", "PERF' Historique"
         self.inventory_msg = {}
 
+        # Highlight to channels
+        self.highligh_new_watchlist = "Bot Playground", "PERF' Innovation"
+        self.new_timelaps = datetime.timedelta(days=3)
+
         # Winrates loading
         try:
             with open('winrates.pkl', 'rb') as winrate_file:
@@ -100,6 +104,8 @@ class MyClient(commands.Bot):
                 await self.unarchiver(self.archive[guild], self.new_idea[guild])
             if str(guild) in self.report_guild_watchlist:
                 await self.deck_inventory(colored_channels)
+            if str(guild) in self.highligh_new_watchlist:
+                await self.highlight_new(colored_channels)
 
     @main_task.before_loop
     async def before_main_task(self):
@@ -116,6 +122,23 @@ class MyClient(commands.Bot):
             activity_markers = '⚡' * bisect.bisect(self.activity_threshold, len(last_messages))
             print(f'Adding "{activity_markers}" to the channel {channel}')
             await channel.edit(name=channel.name.replace('⚡', '') + activity_markers)
+        print('------')
+
+    ###########################################################################################
+    # Highlight new channels
+    ###########################################################################################
+    async def highlight_new(self, colored_channels):
+        print('Start highlighting the new channels')
+        print('------')
+        for channel in colored_channels:
+            async for first_message in channel.history(limit=1, oldest_first=True):
+                if datetime.datetime.utcnow() - first_message.created_at < self.new_timelaps:
+                    print(f'Adding the new flag "🆕" to the channel {channel}')
+                    await channel.edit(name='🆕' + channel.name.replace('🆕', ''))
+                elif '🆕' in channel.name:
+                    print(f'Removing the new flag "🆕" to the channel {channel}')
+                    await channel.edit(name=channel.name.replace('🆕', ''))
+
         print('------')
 
     ###########################################################################################

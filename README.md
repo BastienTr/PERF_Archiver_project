@@ -88,6 +88,20 @@ Le bot modifie ensuite le nom du salon pour que le nombre de ⚡ corresponde au 
 | Seuil pour ⚡⚡ | 15 messages |
 | Seuil pour ⚡⚡⚡ | 45 messages |
 
+[Mise en avant de la nouveauté]()
+-------------------------------------------
+
+*Actif dans PERF' Innovation.*
+
+Pour chaque salon, le bot compare la date du dernier message à la date actuelle.
+Si l'écart est inférieur au seuil, un ⛿ est ajouté devant le nom du salon.
+
+### Paramètres de réglages actuels
+ 
+| Paramètre | Valeur actuelle |
+|:---------:|:---------------:|
+| Délai pour être considéré nouveau | 3 jours |
+
 [Archivage des salons inactifs]()
 -------------------------------------------
 
