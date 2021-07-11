@@ -89,7 +89,7 @@ class MyClient(commands.Bot):
             print('------')
             colored_channels = []
             for channel in guild.channels:
-                if 'color' in str(channel.category).lower():
+                if 'color' in str(channel.category).lower() or '2022' in str(channel.category).lower():
                     colored_channels.append(channel)
             colored_channels.sort(key=lambda channel: channel.name)
             print(f'The colored channels in {guild} are {[channel.name for channel in colored_channels]}')
@@ -188,7 +188,11 @@ class MyClient(commands.Bot):
                                  if 'histo' in channel.category.name.lower() or 'histo' in channel.guild.name.lower()]
         std_colored_channel = [channel for channel in colored_channels
                                  if 'std' in channel.category.name.lower()]
-        for channels, str_format in ((std_colored_channel, '**Standard**'), (histo_colored_channel, '**Historique**')):
+        std20_colored_channel = [channel for channel in colored_channels
+                                 if '2020' in channel.category.name.lower()]
+        for channels, str_format in ((std_colored_channel, '**Standard**'),
+                                     (histo_colored_channel, '**Historique**'),
+                                     (std20_colored_channel, '**Standard 2020**')):
             if channels:
                 winrates = (f'{self.winrates[channel.id, channel.guild.id][0] / sum(self.winrates[channel.id, channel.guild.id]):.0%}'
                             if sum(self.winrates[channel.id, channel.guild.id]) != 0 else 'A tester !'
