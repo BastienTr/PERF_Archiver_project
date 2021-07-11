@@ -189,7 +189,7 @@ class MyClient(commands.Bot):
         std_colored_channel = [channel for channel in colored_channels
                                  if 'std' in channel.category.name.lower()]
         std20_colored_channel = [channel for channel in colored_channels
-                                 if '2020' in channel.category.name.lower()]
+                                 if '2022' in channel.category.name.lower()]
         for channels, str_format in ((std_colored_channel, '**Standard**'),
                                      (histo_colored_channel, '**Historique**'),
                                      (std20_colored_channel, '**Standard 2020**')):
