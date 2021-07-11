@@ -66,7 +66,7 @@ Pour obtenir l'id d'un salon, suivre cette procédure :
 Fonctionnalités passives
 ==================
 
-Toutes les quelques heures, le bot liste tous les salons appartenant à une catégorie dont le nom contient "color"
+Toutes les quelques heures, le bot liste tous les salons appartenant à une catégorie dont le nom contient "color" ou "2022".
 Il peut ensuite réaliser l'une ou plusieurs des tâches suivantes selon qu'elles soient actives ou non sur chacun des serveurs.
 Chaque fonction peut être activée ou non d'un serveur à l'autre.
 Toutes les fonctions cherchant des mots dans les noms de catégories sont insensible à la casse.
