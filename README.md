@@ -91,7 +91,7 @@ Le bot modifie ensuite le nom du salon pour que le nombre de ⚡ corresponde au 
 [Mise en avant de la nouveauté]()
 -------------------------------------------
 
-*Actif dans PERF' Innovation.*
+*Actif dans PERF' Innovation et PERF' Historique.*
 
 Pour chaque salon, le bot compare la date du dernier message à la date actuelle.
 Si l'écart est inférieur au seuil, un ⛿ est ajouté devant le nom du salon.
