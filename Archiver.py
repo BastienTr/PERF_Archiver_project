@@ -30,28 +30,28 @@ class MyClient(commands.Bot):
         self.main_task.start()
 
         # Archive parameters
-        self.archive_guild_watchlist = "Bot Playground", "PERF' Innovation"
+        self.archive_guild_watchlist = "Bot Playground"#, "PERF' Innovation"
         self.archive = {}  # Will be completed in before_archiver
         self.time_before_warning = datetime.timedelta(days=7)
         self.time_before_archive = datetime.timedelta(days=8)
 
         # Unarchive parameters
-        self.unarchive_guild_watchlist = "Bot Playground", "PERF' Innovation"
+        self.unarchive_guild_watchlist = "Bot Playground"#, "PERF' Innovation"
         self.new_idea = {}  # Will be completed in before_archiver
         self.unarchive_timelaps = datetime.timedelta(days=3)
         self.unarchive_nb_users = 2
 
         # Activity tracker parameters
-        self.activity_guild_watchlist = "Bot Playground", "PERF' Innovation"
+        self.activity_guild_watchlist = "Bot Playground"#, "PERF' Innovation"
         self.activity_timelaps = datetime.timedelta(days=3)
         self.activity_threshold = 3, 15, 45  # Based on Perf standard on 3 days
 
         # Report state of server
-        self.report_guild_watchlist = "Bot Playground", "PERF' Innovation", "PERF' Historique"
+        self.report_guild_watchlist = "Bot Playground"#, "PERF' Innovation", "PERF' Historique"
         self.inventory_msg = {}
 
         # Highlight to channels
-        self.highligh_new_watchlist = "Bot Playground", "PERF' Innovation"
+        self.highligh_new_watchlist = "Bot Playground"#, "PERF' Innovation"
         self.new_timelaps = datetime.timedelta(days=3)
 
         # Winrates loading
@@ -82,7 +82,7 @@ class MyClient(commands.Bot):
     ###########################################################################################
     # Update colored channel list
     ###########################################################################################
-    @tasks.loop(hours=3)
+    @tasks.loop(minutes=3)
     async def main_task(self):
         for guild in self.guilds:
             print(f'Start main task in {guild}')
@@ -188,10 +188,13 @@ class MyClient(commands.Bot):
                                  if 'histo' in channel.category.name.lower() or 'histo' in channel.guild.name.lower()]
         std_colored_channel = [channel for channel in colored_channels
                                  if 'std' in channel.category.name.lower()]
+        alchemy_colored_channel = [channel for channel in colored_channels
+                                 if 'alchemy' in channel.category.name.lower()]
         std22_colored_channel = [channel for channel in colored_channels
                                  if '2022' in channel.category.name.lower()]
         for channels, str_format in ((std_colored_channel, '**Standard**'),
                                      (histo_colored_channel, '**Historique**'),
+                                     (alchemy_colored_channel, '**Alchemy**'),
                                      (std22_colored_channel, '**Standard 2022**')):
             if channels:
                 winrates = (f'{self.winrates[channel.id, channel.guild.id][0] / sum(self.winrates[channel.id, channel.guild.id]):.0%}'
@@ -289,4 +292,4 @@ async def move(ctx, channel_id):
 ###########################################################################################
 # Launch the bot
 ###########################################################################################
-client.run('ODM5MDU1MjAzOTExMDczODgz.YJEFDQ.BTZ0Et3FASxMteP0E6VEurHYzh4')
+client.run('ODM5MDU1MjAzOTExMDczODgz.YJEFDQ.7Sto2HkesOuhZ50rgCSC7K8puTY')
